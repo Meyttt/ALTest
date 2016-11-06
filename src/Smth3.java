@@ -29,7 +29,7 @@ class CustomList<T> extends ArrayList<T> {
 }
 public class Smth3 {
     ArrayList<String> result = new ArrayList<>();
-    Random rand = new Random(35);
+    Random rand = new Random();
     public int counterWriting =0;
     public int counter=0;
     CustomList<String> customList = new CustomList<>(5);
@@ -45,7 +45,7 @@ public class Smth3 {
                     try {
                         customList.addNew(oneLine);
                         counterWriting++;
-                        Thread.sleep(400);
+                        Thread.sleep(rand.nextInt(100));
                     } catch (InterruptedException e) {
                         e.printStackTrace();
                     }
@@ -55,37 +55,43 @@ public class Smth3 {
             }
         }
     };
+    Thread writing= new Thread(writeWord);
     //работа с 1 очередью
     Runnable readWord = new Runnable() {
         @Override
         public void run() {
+            while (writing.isAlive() || !customList.isEmpty()) {
                 try {
-                    Thread.sleep(200);
-                    customList2.addNew(customList.remove(customList.size()-1));
-
+                    Thread.sleep(rand.nextInt(200));
+                    customList2.addNew(customList.remove(customList.size() - 1));
                     //customList.printV();
                     counter++;
-                } catch (InterruptedException e) {
-                    e.printStackTrace();
-                }catch (java.lang.ArrayIndexOutOfBoundsException e1){
+                } catch (InterruptedException e2) {
+                    e2.printStackTrace();
+                } catch (java.lang.ArrayIndexOutOfBoundsException e1) {
                     System.err.println("Reading is faster");
                 }
 
+            }
         }
     };
+    Thread showing = new Thread(readWord);
     Runnable runnable2 = new Runnable() {
         @Override
         public void run() {
-            try {
-                Thread.sleep(0);
-                //работа в 2 очереди
-                System.out.println(customList2.get(customList2.size()-1));
-                result.add(customList2.remove(customList2.size()-1));
-            } catch (InterruptedException e) {
-                e.printStackTrace();
-            }catch (ArrayIndexOutOfBoundsException e1){
-                System.err.println("Queue2 is empty!");
+            while(showing.isAlive()||!customList2.isEmpty()) {
+                try {
+                    Thread.sleep(rand.nextInt(300));
+                    //работа в 2 очереди
+                    System.out.println(customList2.get(customList2.size() - 1));
+                    result.add(customList2.remove(customList2.size() - 1));
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
+                } catch (ArrayIndexOutOfBoundsException e1) {
+                    System.err.println("Queue2 is empty!");
+                }
             }
+            showResult();
 
         }
     };
@@ -96,28 +102,19 @@ public class Smth3 {
     }
     public Smth3() throws FileNotFoundException {
     }
-    Thread writing= new Thread(writeWord);
-    Thread showing = new Thread(readWord);
+
+
     Thread finalPart = new Thread(runnable2);
     public static void main(String[] args) throws FileNotFoundException {
         Smth3 smth3 = new Smth3();
         synchronized (smth3.customList) {
             smth3.writing.start();
-
             synchronized (smth3.customList2) {
                 smth3.showing.start();
                 smth3.finalPart.start();
-                while (smth3.showing.isAlive() || smth3.finalPart.isAlive()) {
-                    if (!smth3.writing.isAlive() && smth3.customList.isEmpty()) {
-                        smth3.showing.stop();
-                    }
-                    if (!smth3.showing.isAlive() && smth3.customList2.isEmpty()) {
-                        smth3.finalPart.stop();
-                    }
-                }
             }
         }
-        smth3.showResult();
 
     }
+
 }
