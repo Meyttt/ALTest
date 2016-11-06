@@ -35,7 +35,7 @@ public class Smth3 {
     private int countOfOtherSymbols;
     private List<Character> letters = new ArrayList<>();
     private ArrayList<String> result = new ArrayList<>();
-    //Random rand = new Random();
+    Random rand = new Random();
     public int counterWriting =0;
     public int counter=0;
     private CustomList<String> customList = new CustomList<>(5);
@@ -46,9 +46,6 @@ public class Smth3 {
         @Override
         public void run() {
             try {
-//                synchronized (customList) {
-
-
                 String oneLine = "";
 
                 while((oneLine=bufferedReader.readLine())!=null){
@@ -56,7 +53,7 @@ public class Smth3 {
                         originalLength++;
                         customList.addNew(oneLine);
                         counterWriting++;
-//                    Thread.sleep(1);
+
                     }
 //                }
             } catch (IOException e) {
@@ -81,6 +78,8 @@ public class Smth3 {
                     counter++;
                 } catch (java.lang.ArrayIndexOutOfBoundsException e1) {
                     // System.err.println("Reading is faster");
+                }catch (NullPointerException e2){
+                    System.err.println("Too fast!");
                 }
 
             }
@@ -92,8 +91,6 @@ public class Smth3 {
         public void run() {
             while(showing.isAlive()||!customList2.isEmpty()) {
                 try {
-                    //работа в 2 очереди
-                    //Thread.sleep(0);
                     result.add(customList2.remove(customList2.size() - 1));
                 } catch (ArrayIndexOutOfBoundsException e1) {
                     //System.err.println("Queue2 is empty!");
@@ -142,13 +139,34 @@ public class Smth3 {
             }
         }
     }
+    public boolean allDone(Map<Character,Boolean> map){
+        Set<Character> keys = map.keySet();
+        for(Character key:keys){
+            if (!map.get(key)){
+                return false;
+            }
+        }
+
+        return true;
+    }
     public String deleteExcess(String originalString){
         String result = "";
         for(int i=0;i<originalString.length();i++){
+            HashMap<Character,Boolean> mapLetters = new HashMap<>();
+            for(Character ch:letters){
+                mapLetters.put(ch,false);
+            }
             char currentCh=originalString.charAt(i);
-            for(int y=0;y<letters.size();y++){
-                if (letters.get(y).equals(currentCh)){
+            while (!allDone(mapLetters)){
+                Character nextChar = letters.get(rand.nextInt(letters.size()));
+
+
+                if(nextChar.equals(currentCh)){
                     result+=currentCh;
+                    mapLetters.replace(nextChar,true);
+                    break;
+                }else{
+                    mapLetters.replace(nextChar,true);
                 }
             }
         }
@@ -183,20 +201,6 @@ public class Smth3 {
 
             }
 
-//        Smth3 smth4 = new Smth3();
-//        smth4.oneLoop();
-//        Smth3 smth5 = new Smth3();
-//        smth5.oneLoop();
-//        Smth3 smth6 = new Smth3();
-//        smth6.oneLoop();
-//        Smth3 smth7 = new Smth3();
-//        smth7.oneLoop();
-//        Smth3 smth8 = new Smth3();
-//        smth8.oneLoop();
-//        Smth3 smth9 = new Smth3();
-//        smth9.oneLoop();
-//        Smth3 smth10 = new Smth3();
-//        smth10.oneLoop();
         Set<Integer> keys = loopStatistics.keySet();
         for(int key:keys){
             System.out.println("size: "+key+"; count: "+loopStatistics.get(key));
