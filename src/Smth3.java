@@ -83,6 +83,8 @@ public class Smth3 {
                 result.add(customList2.remove(customList2.size()-1));
             } catch (InterruptedException e) {
                 e.printStackTrace();
+            }catch (ArrayIndexOutOfBoundsException e1){
+                System.err.println("Queue2 is empty!");
             }
 
         }
@@ -101,12 +103,17 @@ public class Smth3 {
         Smth3 smth3 = new Smth3();
         synchronized (smth3.customList) {
             smth3.writing.start();
+
             synchronized (smth3.customList2) {
-                if (smth3.writing.isAlive() || !smth3.customList.isEmpty()) {
-                    smth3.showing.start();
-                }
-                while(smth3.showing.isAlive()||!smth3.customList2.isEmpty()){
-                    smth3.finalPart.run();
+                smth3.showing.start();
+                smth3.finalPart.start();
+                while (smth3.showing.isAlive() || smth3.finalPart.isAlive()) {
+                    if (!smth3.writing.isAlive() && smth3.customList.isEmpty()) {
+                        smth3.showing.stop();
+                    }
+                    if (!smth3.showing.isAlive() && smth3.customList2.isEmpty()) {
+                        smth3.finalPart.stop();
+                    }
                 }
             }
         }
