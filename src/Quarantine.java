@@ -1,5 +1,3 @@
-import com.sun.javafx.collections.MappingChange;
-
 import java.io.*;
 import java.util.*;
 
@@ -25,7 +23,7 @@ class CustomList<T> extends ArrayList<T> {
         this.add(0, object);
     }
 }
-public class Smth3 {
+public class Quarantine {
     static HashMap<Integer,Integer> loopStatistics = new HashMap<>();
     int originalLength=0;
     private int textLength=0;
@@ -104,7 +102,7 @@ public class Smth3 {
             System.out.println(result.get(i));
         }
     }
-    public Smth3() throws FileNotFoundException {
+    public Quarantine() throws FileNotFoundException {
         for(char c='a';c<='z';c++){
             letters.add(c);
         }
@@ -196,8 +194,8 @@ public class Smth3 {
     }
     public static void main(String[] args) throws IOException, InterruptedException {
             for(int i=0;i<100;i++) {
-                Smth3 smth3 = new Smth3();
-                smth3.oneLoop();
+                Quarantine quarantine = new Quarantine();
+                quarantine.oneLoop();
 
             }
 
@@ -211,4 +209,3 @@ public class Smth3 {
 
 
 }
-//private char[] letters = new char[Arrays.asList({'a','b','c','d','e','f','g','h','i','j','k','l','m','n','o','p','q','r','s','t','u','v','w','x','y','z','A','B','C','D','E','F','G','H',I,J,K,L,M,N,O,P,Q,R,S,T,U,V,W,X,Y,Z,1,2,3,4,5,6,7,8,9,0})]
