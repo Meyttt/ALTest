@@ -42,7 +42,7 @@ public class Quarantine {
     //запись в 1 очередь
     Runnable writeWord = new Runnable() {
         @Override
-        public void run() {
+        public synchronized void run() {
             try {
                 String oneLine = "";
 
@@ -61,32 +61,33 @@ public class Quarantine {
             }
         }
     };
-    Thread writing= new Thread(writeWord);
+    private Thread writing= new Thread(writeWord);
     //работа с 1 очередью
     Runnable readWord = new Runnable() {
         @Override
-        public void run() {
-            while (writing.isAlive() || !customList.isEmpty()) {
-                try {
-                    String row = customList.remove(customList.size() - 1);
-                    getStatistics(row);
-                    row=deleteExcess(row);
-                    customList2.addNew(row);
-                    //customList.printV();
-                    counter++;
-                } catch (java.lang.ArrayIndexOutOfBoundsException e1) {
-                    // System.err.println("Reading is faster");
-                }catch (NullPointerException e2){
-                    System.err.println("Too fast!");
+        public synchronized void run() {
+            while (writing.isAlive()|| !customList.isEmpty()) {
+                if (!customList.isEmpty()) {
+                    try {
+                        String row = customList.remove(customList.size() - 1);
+                        getStatistics(row);
+                        row = deleteExcess(row);
+                        customList2.addNew(row);
+                        //customList.printV();
+                        counter++;
+                    } catch (java.lang.ArrayIndexOutOfBoundsException e1) {
+                     System.err.println("Reading is faster");
+                    } catch (NullPointerException e2) {
+//                        System.err.println("Too fast!");
+                    }
                 }
-
             }
         }
     };
-    Thread showing = new Thread(readWord);
+    private Thread showing = new Thread(readWord);
     Runnable runnable2 = new Runnable() {
         @Override
-        public void run() {
+        public synchronized void run() {
             while(showing.isAlive()||!customList2.isEmpty()) {
                 try {
                     result.add(customList2.remove(customList2.size() - 1));
@@ -115,7 +116,7 @@ public class Quarantine {
         letters.add(' ');
     }
 
-    Thread finalPart = new Thread(runnable2);
+    private Thread finalPart = new Thread(runnable2);
     public void writeResult() throws IOException {
         FileOutputStream fileOutputStream = new FileOutputStream("result1.txt");
         for(int i=0;i<result.size();i++) {
@@ -171,17 +172,13 @@ public class Quarantine {
         return result;
     }
     public  void oneLoop() throws InterruptedException, IOException {
-        synchronized (customList) {
             writing.start();
-            synchronized (customList2) {
-                showing.start();
-                finalPart.start();
+            showing.start();
+            finalPart.start();
 
-            }
             writing.join();
             showing.join();
             finalPart.join();
-        }
         writeResult();
         if(loopStatistics.containsKey(result.size())){
             int count = loopStatistics.get(result.size())+1;
@@ -193,7 +190,7 @@ public class Quarantine {
 
     }
     public static void main(String[] args) throws IOException, InterruptedException {
-            for(int i=0;i<100;i++) {
+            for(int i=0;i<50;i++) {
                 Quarantine quarantine = new Quarantine();
                 quarantine.oneLoop();
 
